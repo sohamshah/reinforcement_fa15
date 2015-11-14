@@ -61,17 +61,18 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
                 if mdp.isTerminal(state):
                     i += 1
                     continue
-                possible_actions = mdp.getPossibleActions(state)
-                max_sum = None
-                for a in possible_actions:
-                    a_sum = self.computeQValueFromValues(state, a)
-                    if a_sum > max_sum:
-                        max_sum = a_sum
-                self.values[state] = max_sum
+                self.values[state] = self.getMaxQValue(state)
                 i += 1
         # import pdb; pdb.set_trace()
             #state_index += 1
 
+    def getMaxQValue(self, state):
+        max_Q = None
+        for a in self.mdp.getPossibleActions(state):
+            q = self.computeQValueFromValues(state, a)
+            if q > max_Q:
+                max_Q = q
+        return max_Q
 
     def getValue(self, state):
         """
@@ -149,3 +150,31 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
             self.values[state] = 0
 
         "*** YOUR CODE HERE ***"
+        predecessors = {}
+        for state in states:
+            possible_actions = self.mdp.getPossibleActions(state)
+            for a in possible_actions:
+                predecessor_states = self.mdp.getTransitionStatesAndProbs(state, a)
+                for predecessor, _ in predecessor_states:
+                    if predecessor in predecessors:
+                        predecessors[predecessor].add(state)
+                    else:
+                        predecessors[predecessor] = set([state])
+
+
+        queue = util.PriorityQueue()
+        for state in states:
+            if not self.mdp.isTerminal(state):
+                diff = abs(self.getMaxQValue(state) - self.getValue(state))
+                queue.push(state, -diff)
+
+        for i in range(self.iterations):
+            if queue.isEmpty():
+                break
+            s = queue.pop()
+            if not self.mdp.isTerminal(s):
+                self.values[s] = self.getMaxQValue(s)
+                for predecessor in predecessors[s]:
+                    diff = abs(self.getMaxQValue(predecessor) - self.getValue(predecessor))
+                    if diff > theta:
+                        queue.update(predecessor, -diff)
