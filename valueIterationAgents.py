@@ -17,7 +17,7 @@ import mdp, util
 from learningAgents import ValueEstimationAgent
 import collections
 import time
-import random
+
 
 class AsynchronousValueIterationAgent(ValueEstimationAgent):
     """
@@ -53,24 +53,23 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
             self.values[state] = 0
 
         "*** YOUR CODE HERE ***"
-        states_len = len(states)
-        for _ in range(iterations):
-            state_index = random.randrange(0, states_len)
-            state = states[state_index]
-            if mdp.isTerminal(state):
-                continue
-            possible_actions = mdp.getPossibleActions(state)
-            max_sum = 0
-            for a in possible_actions:
-                a_sum = 0
-                next_states = mdp.getTransitionStatesAndProbs(state, a)
-                for s_prime, prob_sPrime in next_states:
-                    a_sum += prob_sPrime*(mdp.getReward(state) + discount*self.values[s_prime])
-
-                if a_sum > max_sum:
-                    max_sum = a_sum
-            self.values[state] = max_sum
-            #import pdb; pdb.set_trace()
+        i = 0
+        while i < self.iterations:
+            for state in states:
+                if i >= self.iterations:
+                    break
+                if mdp.isTerminal(state):
+                    i += 1
+                    continue
+                possible_actions = mdp.getPossibleActions(state)
+                max_sum = None
+                for a in possible_actions:
+                    a_sum = self.computeQValueFromValues(state, a)
+                    if a_sum > max_sum:
+                        max_sum = a_sum
+                self.values[state] = max_sum
+                i += 1
+        # import pdb; pdb.set_trace()
             #state_index += 1
 
 
@@ -106,13 +105,11 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
         possible_actions = self.mdp.getPossibleActions(state)
         if len(possible_actions) == 0:
             return None
-        best_action = ""
-        best_action_sum = 0
+        best_action, best_action_sum = None, None
         for a in possible_actions:
             q = self.computeQValueFromValues(state, a)
             if q > best_action_sum:
-                best_action_sum = q
-                best_action = a
+                best_action_sum, best_action = q, a
         return best_action
 
 
