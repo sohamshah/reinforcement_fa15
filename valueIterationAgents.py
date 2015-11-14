@@ -104,11 +104,17 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
         """
         "*** YOUR CODE HERE ***"
         possible_actions = self.mdp.getPossibleActions(state)
+        if len(possible_actions) == 0:
+            return None
         best_action = ""
         best_action_sum = 0
-        a_sum = 0
         for a in possible_actions:
-            
+            q = self.computeQValueFromValues(state, a)
+            if q > best_action_sum:
+                best_action_sum = q
+                best_action = a
+        return best_action
+
 
 
 
