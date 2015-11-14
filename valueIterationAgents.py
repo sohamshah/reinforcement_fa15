@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -17,6 +17,7 @@ import mdp, util
 from learningAgents import ValueEstimationAgent
 import collections
 import time
+import random
 
 class AsynchronousValueIterationAgent(ValueEstimationAgent):
     """
@@ -52,6 +53,26 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
             self.values[state] = 0
 
         "*** YOUR CODE HERE ***"
+        states_len = len(states)
+        for _ in range(iterations):
+            state_index = random.randrange(0, states_len)
+            state = states[state_index]
+            if mdp.isTerminal(state):
+                continue
+            possible_actions = mdp.getPossibleActions(state)
+            max_sum = 0
+            for a in possible_actions:
+                a_sum = 0
+                next_states = mdp.getTransitionStatesAndProbs(state, a)
+                for s_prime, prob_sPrime in next_states:
+                    a_sum += prob_sPrime*(mdp.getReward(state) + discount*self.values[s_prime])
+
+                if a_sum > max_sum:
+                    max_sum = a_sum
+            self.values[state] = max_sum
+            #import pdb; pdb.set_trace()
+            #state_index += 1
+
 
     def getValue(self, state):
         """
@@ -65,7 +86,12 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        qvalue = 0
+        next_states = self.mdp.getTransitionStatesAndProbs(state, action)
+        for s_prime, prob_sPrime in next_states:
+            qvalue += prob_sPrime*(self.mdp.getReward(state) + self.discount*self.values[s_prime])
+        return qvalue
+
 
     def computeActionFromValues(self, state):
         """
@@ -77,7 +103,14 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        possible_actions = self.mdp.getPossibleActions(state)
+        best_action = ""
+        best_action_sum = 0
+        a_sum = 0
+        for a in possible_actions:
+            
+
+
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
