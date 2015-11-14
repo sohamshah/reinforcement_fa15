@@ -60,7 +60,7 @@ def question3e():
     # If not possible, return 'NOT POSSIBLE'
 
 def question5():
-    return 0, 0, 0, 0, 0, 0
+    return 4, 4, 1, 1, 4, 1
 
 def question9():
     answerEpsilon = None

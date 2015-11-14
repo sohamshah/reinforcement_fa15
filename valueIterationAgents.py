@@ -51,6 +51,7 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
         states = self.mdp.getStates()
         for state in states:
             self.values[state] = 0
+        #log = open("q5.txt", "w")
 
         "*** YOUR CODE HERE ***"
         i = 0
@@ -62,7 +63,12 @@ class AsynchronousValueIterationAgent(ValueEstimationAgent):
                     i += 1
                     continue
                 self.values[state] = self.getMaxQValue(state)
+                # diffsum = sum(abs(value - 100) for state, value in self.values.items() if not self.mdp.isTerminal(state))
+                # if diffsum < 200:
+                #     print >>log, ('Q1 CONVERGED AT ITERATION: ', i)
+                #     log.close()
                 i += 1
+
         # import pdb; pdb.set_trace()
             #state_index += 1
 
@@ -148,7 +154,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
         states = self.mdp.getStates()
         for state in states:
             self.values[state] = 0
-
+        # log = open("q5_4.txt", "w")
         "*** YOUR CODE HERE ***"
         predecessors = {}
         for state in states:
