@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -70,7 +70,17 @@ class PolicyIterationAgent(ValueEstimationAgent):
     def runPolicyImprovement(self):
         """ Run policy improvement using self.policyValues. Should update self.policy. """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        states = self.mdp.getStates()
+        for state in states:
+            # if self.mdp.isTerminal(state):
+            #     self.policy[state] = None
+            max_Utility = None
+            best_action = None
+            for action in self.mdp.getPossibleActions(state):
+                utility = self.computeQValueFromValues(state, action)
+                if utility > max_Utility:
+                    max_Utility, best_action = utility, action
+            self.policy[state] = best_action
 
     def computeQValueFromValues(self, state, action):
         """
@@ -78,7 +88,11 @@ class PolicyIterationAgent(ValueEstimationAgent):
           value function stored in self.policyValues.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        qvalue = 0
+        next_states = self.mdp.getTransitionStatesAndProbs(state, action)
+        for s_prime, prob_sPrime in next_states:
+            qvalue += prob_sPrime*(self.mdp.getReward(state) + self.discount*self.values[s_prime])
+        return qvalue
 
     def getValue(self, state):
         return self.policyValues[state]
