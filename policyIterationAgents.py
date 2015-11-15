@@ -36,7 +36,7 @@ class PolicyIterationAgent(ValueEstimationAgent):
               mdp.getStates()
               mdp.getPossibleActions(state)
               mdp.getTransitionStatesAndProbs(state, action)
-              mdp.getReward(state, action, nextState)
+              mdp.getReward(state, action, nextState) #WRONG WRONG WRONG WRONG
               mdp.isTerminal(state)
         """
         self.mdp = mdp
@@ -65,7 +65,35 @@ class PolicyIterationAgent(ValueEstimationAgent):
         """ Run policy evaluation to get the state values under self.policy. Should update self.policyValues.
         Implement this by solving a linear system of equations using numpy. """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        states = self.mdp.getStates()
+        numStates = len(states)
+        toSolve = np.zeros((numStates, numStates))
+
+        rightHandSide = np.zeros((numStates, 1))
+
+        for i in range(numStates):
+
+            reward = self.mdp.getReward(states[i])
+            rightHandSide[i] = -reward
+
+            currState = states[i]
+            if not self.mdp.isTerminal(currState):
+                action = self.policy[currState]
+                next_states = self.mdp.getTransitionStatesAndProbs(currState, action)
+                for j in range(len(next_states)):
+                        next_state, prob = next_states[j]
+                        stateNum = states.index(next_state)
+                        if currState == next_state:
+                            toSolve[i][stateNum] = (self.discount*(prob-1))
+                        else:
+                            toSolve[i][stateNum] = self.discount*prob
+        print toSolve
+        ans = np.linalg.solve(toSolve, reward)
+
+        for i in range(numStates):
+            self.policyValues[states[i]] = ans[i]
+
+
 
     def runPolicyImprovement(self):
         """ Run policy improvement using self.policyValues. Should update self.policy. """
@@ -91,7 +119,7 @@ class PolicyIterationAgent(ValueEstimationAgent):
         qvalue = 0
         next_states = self.mdp.getTransitionStatesAndProbs(state, action)
         for s_prime, prob_sPrime in next_states:
-            qvalue += prob_sPrime*(self.mdp.getReward(state) + self.discount*self.values[s_prime])
+            qvalue += prob_sPrime*(self.mdp.getReward(state) + self.discount*self.policyValues[s_prime])
         return qvalue
 
     def getValue(self, state):
