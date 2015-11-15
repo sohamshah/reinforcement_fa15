@@ -67,31 +67,23 @@ class PolicyIterationAgent(ValueEstimationAgent):
         "*** YOUR CODE HERE ***"
         states = self.mdp.getStates()
         numStates = len(states)
-        toSolve = np.zeros((numStates, numStates))
+        eye = np.eye(numStates)
+        rightHandSide = np.zeros(numStates) 
+        toSolve = np.zeros((numStates,numStates))
 
-        rightHandSide = np.zeros((numStates, 1))
+        for state in states:
+            if not self.mdp.isTerminal(state):
+                action = self.policy[state]
+                index = states.index(state)
+                rightHandSide[index] = self.mdp.getReward(state)
+                transitions = self.mdp.getTransitionStatesAndProbs(state, action)
+                for nextState, prob in transitions:
+                    toSolve[index][states.index(nextState)] = prob
 
-        for i in range(numStates):
-
-            reward = self.mdp.getReward(states[i])
-            rightHandSide[i] = -reward
-
-            currState = states[i]
-            if not self.mdp.isTerminal(currState):
-                action = self.policy[currState]
-                next_states = self.mdp.getTransitionStatesAndProbs(currState, action)
-                for j in range(len(next_states)):
-                        next_state, prob = next_states[j]
-                        stateNum = states.index(next_state)
-                        if currState == next_state:
-                            toSolve[i][stateNum] = (self.discount*(prob-1))
-                        else:
-                            toSolve[i][stateNum] = self.discount*prob
-        print toSolve
-        ans = np.linalg.solve(toSolve, reward)
-
-        for i in range(numStates):
-            self.policyValues[states[i]] = ans[i]
+        matrixA = eye - self.discount * toSolve
+        ans = np.linalg.solve(matrixA, rightHandSide)
+        for state in states:
+            self.policyValues[state] = ans[states.index(state)]
 
 
 
