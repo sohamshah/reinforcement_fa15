@@ -64,7 +64,6 @@ class PolicyIterationAgent(ValueEstimationAgent):
     def runPolicyEvaluation(self):
         """ Run policy evaluation to get the state values under self.policy. Should update self.policyValues.
         Implement this by solving a linear system of equations using numpy. """
-        "*** YOUR CODE HERE ***"
         states = self.mdp.getStates()
         numStates = len(states)
         eye = np.eye(numStates)
@@ -80,8 +79,8 @@ class PolicyIterationAgent(ValueEstimationAgent):
                 for nextState, prob in transitions:
                     toSolve[index][states.index(nextState)] = prob
 
-        matrixA = eye - self.discount * toSolve
-        ans = np.linalg.solve(matrixA, rightHandSide)
+        toSolve = eye - self.discount * toSolve
+        ans = np.linalg.solve(toSolve, rightHandSide)
         for state in states:
             self.policyValues[state] = ans[states.index(state)]
 
